@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Night Bite Dice Game</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0b132b;
+  color:white;
+  text-align:center;
+}
+h2{color:#ffd700;margin-top:15px}
+p{margin-top:5px}
+.dice{
+  font-size:90px;
+  margin:20px;
+  cursor:pointer;
+  transition:transform .6s;
+}
+.roll{transform:rotate(360deg) scale(1.15)}
+.box{margin:8px;font-size:18px}
+.total{font-size:28px;color:#ffcc00}
+.result{margin:15px;font-size:20px}
+button{
+  padding:14px;
+  font-size:18px;
+  background:#ffd700;
+  border:none;
+  border-radius:14px;
+  width:90%;
+  margin-bottom:20px;
+}
+.codeBox{
+  background:#1c2541;
+  padding:14px;
+  margin:10px;
+  border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🎲 NIGHT BITE DICE GAME 🎲</h2>
+<p>3 Chance – Luck Try Karo</p>
+
+<div id="dice" class="dice" onclick="rollDice()">🎲</div>
+
+<div class="box">Rolls: <span id="rolls">—</span></div>
+<div class="box total">Total: <span id="total">0</span></div>
+
+<div id="result" class="result"></div>
+<div id="coupon"></div>
+
+<button id="nextBtn" onclick="resetGame()" style="display:none">
+Next Customer
+</button>
+
+<!-- 🔊 WORKING SOUNDS (PIXABAY CDN) -->
+<audio id="diceSound" preload="auto"
+src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5a1d5f5f4e.mp3"></audio>
+
+<audio id="winSound" preload="auto"
+src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c8d9c4f7a.mp3"></audio>
+
+<audio id="loseSound" preload="auto"
+src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c3f9f6a6e3.mp3"></audio>
+
+<script>
+let chance = 0;
+let total = 0;
+let rolls = [];
+
+// 🔢 GLOBAL CUSTOMER COUNT (same mobile continue)
+let customer = localStorage.getItem("nb_customer_count")
+  ? parseInt(localStorage.getItem("nb_customer_count"))
+  : 0;
+
+/*
+WIN PLAN:
+6  → Soft Nugget Pav (15)
+14 → Momos (10)
+25 → Soft Popcorn (8)
+33 → Seekh Pav (20)
+*/
+const winPlan = {
+  6 : { total:15, gift:"Soft Nugget Pav", code:"NB-SNPW15" },
+  14: { total:10, gift:"Momos",          code:"NB-MSW10" },
+  25: { total:8,  gift:"Soft Popcorn",   code:"NB-SPW8"  },
+  33: { total:20, gift:"Seekh Pav",      code:"NB-SPVW20"}
+};
+
+// ❌ beech me ye totals kabhi nahi aane chahiye
+const blockedTotals = [8,10,15,20];
+
+function rollDice(){
+  if(chance >= 3) return;
+
+  document.getElementById("diceSound").play();
+
+  const nextCustomer = customer + 1;
+  let roll;
+
+  if(!winPlan[nextCustomer]){
+    roll = Math.floor(Math.random()*6)+1;
+    if(chance === 2 && blockedTotals.includes(total + roll)){
+      roll = 1;
+    }
+  }else{
+    if(chance < 2){
+      roll = Math.floor(Math.random()*6)+1;
+    }else{
+      roll = winPlan[nextCustomer].total - total;
+      if(roll < 1 || roll > 6) roll = 1;
+    }
+  }
+
+  rolls.push(roll);
+  total += roll;
+  chance++;
+
+  const dice = document.getElementById("dice");
+  dice.classList.add("roll");
+  setTimeout(()=>dice.classList.remove("roll"),600);
+
+  document.getElementById("rolls").innerText = rolls.join(", ");
+  document.getElementById("total").innerText = total;
+
+  if(chance === 3) checkResult();
+}
+
+function checkResult(){
+  customer++;
+  if(customer > 33) customer = 1;
+  localStorage.setItem("nb_customer_count", customer);
+
+  let msg = "😅 Better Luck Next Time";
+  let html = "";
+
+  if(winPlan[customer] && total === winPlan[customer].total){
+    const w = winPlan[customer];
+    msg = `🎉 Congratulations! You Won ${w.gift}`;
+    html = `
+      <div class="codeBox">
+        🎟️ <b>Winning Code</b><br><br>
+        <b style="font-size:22px">${w.code}</b><br><br>
+        Order karte waqt message me ye code likhna
+      </div>`;
+    document.getElementById("winSound").play();
+  }else{
+    document.getElementById("loseSound").play();
+  }
+
+  document.getElementById("result").innerText = msg;
+  document.getElementById("coupon").innerHTML = html;
+  document.getElementById("nextBtn").style.display = "block";
+}
+
+function resetGame(){
+  chance = 0;
+  total = 0;
+  rolls = [];
+  document.getElementById("rolls").innerText = "—";
+  document.getElementById("total").innerText = "0";
+  document.getElementById("result").innerText = "";
+  document.getElementById("coupon").innerHTML = "";
+  document.getElementById("nextBtn").style.display = "none";
+}
+</script>
+
+</body>
+</html>
+Bhai is cording ko mobile mai file kaise banaoi
