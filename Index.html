@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Night Bite Dice Game</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle, #061a33, #020b18);
+  color: #8feaff;
+  text-align: center;
+}
+
+.container {
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 25px;
+  border-radius: 20px;
+  background: rgba(0, 20, 40, 0.85);
+  box-shadow: 0 0 30px #00eaff;
+}
+
+h1 {
+  color: #00eaff;
+  text-shadow: 0 0 15px #00eaff;
+}
+
+.neon-box {
+  border: 2px solid #00eaff;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 12px 0;
+  box-shadow: 0 0 10px #00eaff;
+}
+
+#dice {
+  font-size: 90px;
+  margin: 20px 0;
+  text-shadow: 0 0 25px #00eaff;
+}
+
+button {
+  background: transparent;
+  border: 2px solid #00eaff;
+  color: #00eaff;
+  padding: 15px 35px;
+  font-size: 18px;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 0 15px #00eaff;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #00eaff;
+  color: #001;
+  box-shadow: 0 0 30px #00eaff;
+}
+
+.result-win {
+  color: #00ff99;
+  text-shadow: 0 0 15px #00ff99;
+  font-size: 20px;
+}
+
+.result-lose {
+  color: #ff4d6d;
+  text-shadow: 0 0 15px #ff4d6d;
+  font-size: 18px;
+}
+
+.footer {
+  margin-top: 15px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>🎲 Night Bite Dice 🎲</h1>
+
+  <div class="neon-box">
+    👤 Customer: <span id="customer">1</span><br>
+    🎯 Chance: <span id="chance">1</span>/3
+  </div>
+
+  <div id="dice">🎲</div>
+
+  <div class="neon-box">
+    🔢 Total: <span id="total">0</span>
+  </div>
+
+  <button onclick="rollDice()">ROLL DICE</button>
+
+  <h3 id="result"></h3>
+
+  <div class="footer">
+    Lucky Numbers: 8 • 10 • 15 • 18
+  </div>
+</div>
+
+<script>
+let customer = 1;
+let chance = 1;
+let total = 0;
+
+// Lucky numbers
+const luckyNumbers = [8, 10, 15, 18];
+
+// Confirm customer → confirm lucky number
+const confirmLuckyMap = {
+  6: 10,
+  14: 8,
+  25: 15,
+  35: 18
+};
+
+function rollDice() {
+  if (chance > 3) return;
+
+  let dice = Math.floor(Math.random() * 6) + 1;
+  document.getElementById("dice").innerText = dice;
+
+  total += dice;
+  document.getElementById("total").innerText = total;
+
+  if (chance === 3) {
+    checkResult();
+  } else {
+    chance++;
+    document.getElementById("chance").innerText = chance;
+  }
+}
+
+function checkResult() {
+
+  // Confirm lucky customer logic
+  if (confirmLuckyMap[customer]) {
+    total = confirmLuckyMap[customer];
+    document.getElementById("total").innerText = total;
+
+    document.getElementById("result").innerHTML =
+      "🎉 <span class='result-win'>Confirm Gift! Lucky Number " +
+      total + " 🎁</span>";
+  }
+  // Normal lucky check
+  else if (luckyNumbers.includes(total)) {
+    document.getElementById("result").innerHTML =
+      "🎉 <span class='result-win'>Lucky Number! Gift Won 🎁</span>";
+  }
+  // No gift
+  else {
+    document.getElementById("result").innerHTML =
+      "<span class='result-lose'>❌ Better Luck Next Time</span>";
+  }
+
+  setTimeout(nextCustomer, 3000);
+}
+
+function nextCustomer() {
+  customer++;
+  chance = 1;
+  total = 0;
+
+  document.getElementById("customer").innerText = customer;
+  document.getElementById("chance").innerText = chance;
+  document.getElementById("total").innerText = total;
+  document.getElementById("dice").innerText = "🎲";
+  document.getElementById("result").innerText = "";
+}
+</script>
+
+</body>
+</html>
